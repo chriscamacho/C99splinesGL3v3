@@ -26,11 +26,11 @@ static GLuint SplineProgram = 0;
 static GLuint SplineVAO = 0;
 static GLuint SplineVBO = 0;
 
-clist_t* SplineList;
+clist_t*      SplineList;
 
 void initSpline()
 {
-    SplineList = clistCreateList();
+    SplineList    = clistCreateList();
     SplineProgram = createProgramGlsl("data/rich_lines.glsl", true);
     glUseProgram(SplineProgram);
 
@@ -163,7 +163,7 @@ void renderSpline(Spline* s)
     glCheckError(__FILE__, __LINE__);
 }
 
-void SplineRenderAll(float* proj) 
+void SplineRenderAll(float* proj)
 {
     setSplinePerspective(proj);
     cnode_t* node = SplineList->head;
@@ -172,7 +172,7 @@ void SplineRenderAll(float* proj)
         updateSpline(s);
         renderSpline(s);
         node = node->next;
-    }   
+    }
 }
 
 void SplineRelease()

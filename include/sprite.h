@@ -9,6 +9,7 @@ typedef struct _Sprite
     vec2s  pos;
     vec2s  dragOff;
     bool   dragging;
+    bool   draggable;
     vec2s  size;
     float  rot;
     GLuint tex;

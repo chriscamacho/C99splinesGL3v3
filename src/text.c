@@ -29,11 +29,11 @@ void renderText(const char* text, vec2s p, float r, bool centre, mat4s M)
     CGLM_ALIGN(16) mat4s T  = glms_mat4_ucopy(M);
     T = glms_translate(T, tv);
     T = glms_rotate_z(T, r);
-    float l = strlen(text) * 6;
+    float l  = strlen(text) * 6;
     float ly = 0;
     if (!centre) {
-        l = -6;
-        ly =12;
+        l  = -6;
+        ly = 12;
     }
     tv = (vec3s){ { -l, ly, 0 } };
     T  = glms_translate(T, tv);

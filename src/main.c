@@ -31,13 +31,13 @@
 #define winTitle      "C99 OpenGL splines"   // also used by fps
 
 // TODO create a mouse struct in main.h
-vec2s  mousePos     = GLMS_VEC2_ZERO_INIT;            // mouse, screen coords, screen centre is (0,0)
-vec2s  lastMousePos = GLMS_VEC2_ZERO_INIT;
+vec2s   mousePos     = GLMS_VEC2_ZERO_INIT;           // mouse, screen coords, screen centre is (0,0)
+vec2s   lastMousePos = GLMS_VEC2_ZERO_INIT;
 CGLM_ALIGN(8) vec3s pointerPos = GLMS_VEC3_ZERO_INIT; // unprojected "world" mouse coords
-bool   dragging = false;
-Sprite mouseSprite;
+bool    dragging = false;
+Sprite* mouseSprite;
 
-bool   dumpSplines = false; // key event signal to main loop
+bool    dumpSplines = false; // key event signal to main loop
 
 
 // creates a combined matrix to provide zoom scale and projection
@@ -204,22 +204,17 @@ int main()
     float hh = winData.winSize.y / 2.0;
     winData.pan = (vec3s) { { 0, 0, 0.0 } };
 
-    mouseSprite.tint   = (vec4s) { { 0.75, 0.2, 1, 1 } };
-    mouseSprite.tex    = 95;
-    mouseSprite.rot    = 0;
-    mouseSprite.size.x = 64;
-    mouseSprite.size.y = 64;
 
     glCheckError(__FILE__, __LINE__);
 
-    float  start[] =
+    float start[] =
     {
         -168.2221, 104.9158, -446.8788,  238.5632,  -38.4472,  238.5745, -310.8877, 104.5538,
         -140.6923, -97.9892, -295.1754,   11.9682, -289.7881, -229.4157, -448.7034, -99.8921,
         103.7043,  181.3177,  349.1771,   22.4101,  209.0544,   21.2095,  433.5792, 196.5060,
         101.9727,  -48.8820,  208.1340, -204.8342,  361.7113, -204.4507,  441.0488, -44.0520,
     };
-    int    ix = 0;
+    int   ix = 0;
 
     for (int i = 0; i < numSplines; i++)
     {
@@ -237,6 +232,15 @@ int main()
         s->endSprite->pos.y   = start[ix++];
     }
 
+
+    mouseSprite            = newSprite((vec4s){ { -1, 2, -1, 2 } }, 0);
+    mouseSprite->tint      = (vec4s) { { 0.75, 0.2, 1, 1 } };
+    mouseSprite->tex       = 95;
+    mouseSprite->rot       = 0;
+    mouseSprite->size.x    = 64;
+    mouseSprite->size.y    = 64;
+    mouseSprite->draggable = false;
+
     // -------------------------------------------------------------------
     //                          main loop
     // -------------------------------------------------------------------
@@ -244,7 +248,7 @@ int main()
     double fpsCount = 0;
     float  FPS      = 0;
     float  fr       = 0; // rotation of text
-    int frames = 0;
+    int    frames   = 0;
 
     while (!glfwWindowShouldClose(window)) {
         frames++;
@@ -271,12 +275,12 @@ int main()
         mousePos.y = -ypos + (winData.winSize.y / 2);
 
         // update sprite pointer
-        mouseSprite.pos.x = pointerPos.x + (16 * (1.0 / winData.zoom.x));
-        mouseSprite.pos.y = pointerPos.y - (16 * (1.0 / winData.zoom.y));
+        mouseSprite->pos.x = pointerPos.x + (16 * (1.0 / winData.zoom.x));
+        mouseSprite->pos.y = pointerPos.y - (16 * (1.0 / winData.zoom.y));
 
         // ensure mouse sprite stays unzoomed
-        mouseSprite.size.x = 32 * (1.0 / winData.zoom.x);
-        mouseSprite.size.y = mouseSprite.size.x;
+        mouseSprite->size.x = 32 * (1.0 / winData.zoom.x);
+        mouseSprite->size.y = mouseSprite->size.x;
 
         // middle mouse pans screen
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
@@ -292,10 +296,12 @@ int main()
                 cnode_t* node = SpriteList->head;
                 while (node != NULL) {
                     Sprite* s = (Sprite*)node->data;
-                    if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
-                        s->dragOff.x = s->pos.x - pointerPos.x;
-                        s->dragOff.y = s->pos.y - pointerPos.y;
-                        s->dragging  = true;
+                    if (s->draggable) {
+                        if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
+                            s->dragOff.x = s->pos.x - pointerPos.x;
+                            s->dragOff.y = s->pos.y - pointerPos.y;
+                            s->dragging  = true;
+                        }
                     }
                     node = node->next;
                 }
@@ -349,10 +355,10 @@ int main()
                 Spline* s = (Spline*)node->data;
 
                 printf("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f,\n",
-                        s->startSprite->pos.x, s->startSprite->pos.y,
-                        s->cp1Sprite->pos.x, s->cp1Sprite->pos.y,
-                        s->cp2Sprite->pos.x, s->cp2Sprite->pos.y,
-                        s->endSprite->pos.x, s->endSprite->pos.y);
+                       s->startSprite->pos.x, s->startSprite->pos.y,
+                       s->cp1Sprite->pos.x, s->cp1Sprite->pos.y,
+                       s->cp2Sprite->pos.x, s->cp2Sprite->pos.y,
+                       s->endSprite->pos.x, s->endSprite->pos.y);
                 node = node->next;
             }
             dumpSplines = false;
@@ -367,32 +373,35 @@ int main()
 
         while (node != NULL) {
             Sprite* s = (Sprite*)node->data;
-            if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
-                s->tint.r = s->otint.r * .6;
-                s->tint.g = s->otint.g * .6;
-                s->tint.b = s->otint.b * .6;
-            } else {
-                s->tint.r = s->otint.r;
-                s->tint.g = s->otint.g;
-                s->tint.b = s->otint.b;
+            if (s->draggable) {
+                if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
+                    s->tint.r = s->otint.r * .6;
+                    s->tint.g = s->otint.g * .6;
+                    s->tint.b = s->otint.b * .6;
+                } else {
+                    s->tint.r = s->otint.r;
+                    s->tint.g = s->otint.g;
+                    s->tint.b = s->otint.b;
+                }
             }
             node = node->next;
         }
-        SpriteRenderAll((float*)&PST.raw);
+
 
         char fpsStr[80] = { 0 };
 
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, true,PST);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x/2)+2, (winData.winSize.y/2)-24 } } , 0, false,winData.proj);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, true, PST);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, 0, false, winData.proj);
         sprintf(fpsStr, "Frames: %i", frames);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x/2)+2, (-winData.winSize.y/2) } }, 0, false,winData.proj);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, 0, false, winData.proj);
 
         SplineRenderAll((float*)&PST.raw);
+        SpriteRenderAll((float*)&PST.raw);
 
-        setSpritePerspective((float*)&PST.raw);
-        renderSprite(&mouseSprite);
+        //setSpritePerspective((float*)&PST.raw);
+        //renderSprite(&mouseSprite);
         glCheckError(__FILE__, __LINE__);
 
         glfwSwapBuffers(window);

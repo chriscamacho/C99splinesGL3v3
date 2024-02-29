@@ -59,8 +59,9 @@ Sprite* newSprite(vec4s area, int cpType)
 
     s->otint = s->tint;
 
-    s->dragOff  = (vec2s)GLMS_VEC2_ZERO_INIT;
-    s->dragging = false;
+    s->dragOff   = (vec2s)GLMS_VEC2_ZERO_INIT;
+    s->dragging  = false;
+    s->draggable = true;
     clistAddNode(SpriteList, s);
     return(s);
 }
