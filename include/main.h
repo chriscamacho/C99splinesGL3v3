@@ -8,6 +8,7 @@
 #include "clist.h"
 
 extern clist_t* SpriteList;
+extern clist_t* SplineList;
 
 typedef struct
 {

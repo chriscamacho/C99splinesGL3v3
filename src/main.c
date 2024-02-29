@@ -40,7 +40,6 @@ Sprite mouseSprite;
 bool   dumpSplines = false; // key event signal to main loop
 
 
-
 // creates a combined matrix to provide zoom scale and projection
 mat4s combinedMatrix(WinData* w)
 {
@@ -213,8 +212,6 @@ int main()
 
     glCheckError(__FILE__, __LINE__);
 
-    Spline* splines[numSplines] = { 0 };
-
     float  start[] =
     {
         -168.2221, 104.9158, -446.8788,  238.5632,  -38.4472,  238.5745, -310.8877, 104.5538,
@@ -229,15 +226,15 @@ int main()
         CGLM_ALIGN(16) vec4s area;
         area = (vec4s) { { -hw / 2 + 128, winData.winSize.x - 256,
                            -hh / 2 + 128, winData.winSize.y - 256 } };
-        splines[i] = newSpline(area);
-        splines[i]->startSprite->pos.x = start[ix++];
-        splines[i]->startSprite->pos.y = start[ix++];
-        splines[i]->cp1Sprite->pos.x   = start[ix++];
-        splines[i]->cp1Sprite->pos.y   = start[ix++];
-        splines[i]->cp2Sprite->pos.x   = start[ix++];
-        splines[i]->cp2Sprite->pos.y   = start[ix++];
-        splines[i]->endSprite->pos.x   = start[ix++];
-        splines[i]->endSprite->pos.y   = start[ix++];
+        Spline* s = newSpline(area);
+        s->startSprite->pos.x = start[ix++];
+        s->startSprite->pos.y = start[ix++];
+        s->cp1Sprite->pos.x   = start[ix++];
+        s->cp1Sprite->pos.y   = start[ix++];
+        s->cp2Sprite->pos.x   = start[ix++];
+        s->cp2Sprite->pos.y   = start[ix++];
+        s->endSprite->pos.x   = start[ix++];
+        s->endSprite->pos.y   = start[ix++];
     }
 
     // -------------------------------------------------------------------
@@ -347,17 +344,19 @@ int main()
         lastMousePos.y = mousePos.y;
 
         if (dumpSplines) {
-            for (int i = 0; i < numSplines; i++)
-            {
-                Spline* s = splines[i];
+            cnode_t* node = SplineList->head;
+            while (node != NULL) {
+                Spline* s = (Spline*)node->data;
+
                 printf("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f,\n",
-                       s->startSprite->pos.x, s->startSprite->pos.y,
-                       s->cp1Sprite->pos.x, s->cp1Sprite->pos.y,
-                       s->cp2Sprite->pos.x, s->cp2Sprite->pos.y,
-                       s->endSprite->pos.x, s->endSprite->pos.y);
+                        s->startSprite->pos.x, s->startSprite->pos.y,
+                        s->cp1Sprite->pos.x, s->cp1Sprite->pos.y,
+                        s->cp2Sprite->pos.x, s->cp2Sprite->pos.y,
+                        s->endSprite->pos.x, s->endSprite->pos.y);
+                node = node->next;
             }
+            dumpSplines = false;
         }
-        dumpSplines = false;
 
         //--------------------------------------------------------------
         //                    Render
@@ -390,13 +389,7 @@ int main()
         sprintf(fpsStr, "Frames: %i", frames);
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x/2)+2, (-winData.winSize.y/2) } }, 0, false,winData.proj);
 
-
-        setSplinePerspective((float*)&PST.raw);
-        for (int i = 0; i < numSplines; i++)
-        {
-            updateSpline(splines[i]); // done here to avoid extra loop
-            renderSpline(splines[i]);
-        }
+        SplineRenderAll((float*)&PST.raw);
 
         setSpritePerspective((float*)&PST.raw);
         renderSprite(&mouseSprite);
@@ -410,7 +403,7 @@ int main()
     // just to catch anything missed in main loop ...
     glCheckError(__FILE__, __LINE__);
 
-    SpriteRelease();
+    SpriteRelease(); // free sprites first.
     SplineRelease();
 
     glCheckError(__FILE__, __LINE__);

@@ -4,6 +4,7 @@
 #include "util.h"
 #include "sprite.h"  // splines dependency for control points
 #include "spline.h"
+#include "clist.h"
 
 #include <stdio.h>
 
@@ -25,8 +26,11 @@ static GLuint SplineProgram = 0;
 static GLuint SplineVAO = 0;
 static GLuint SplineVBO = 0;
 
+clist_t* SplineList;
+
 void initSpline()
 {
+    SplineList = clistCreateList();
     SplineProgram = createProgramGlsl("data/rich_lines.glsl", true);
     glUseProgram(SplineProgram);
 
@@ -68,6 +72,7 @@ Spline* newSpline(vec4s area)
     spline->cp1Sprite   = newSprite(area, 1);
     spline->cp2Sprite   = newSprite(area, 2);
     spline->endSprite   = newSprite(area, 3);
+    clistAddNode(SplineList, spline);
     return(spline);
 }
 
@@ -158,7 +163,27 @@ void renderSpline(Spline* s)
     glCheckError(__FILE__, __LINE__);
 }
 
+void SplineRenderAll(float* proj) 
+{
+    setSplinePerspective(proj);
+    cnode_t* node = SplineList->head;
+    while (node != NULL) {
+        Spline* s = (Spline*)node->data;
+        updateSpline(s);
+        renderSpline(s);
+        node = node->next;
+    }   
+}
+
 void SplineRelease()
 {
     glDeleteProgram(SplineProgram);
+    // don't release the splines sprites as releasing the sprites will do that
+    cnode_t* node = SplineList->head;
+    while (node != NULL) {
+        Spline* s = (Spline*)node->data;
+        free(s);
+        node = node->next;
+    }
+    clistFreeList(&SplineList);
 }

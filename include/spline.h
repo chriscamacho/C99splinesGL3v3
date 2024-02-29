@@ -25,5 +25,6 @@ void renderSpline(Spline* s);
 Spline* newSpline(vec4s area);
 void updateSpline(Spline* s);
 void SplineRelease();
+void SplineRenderAll(float* p);
 
 #endif
