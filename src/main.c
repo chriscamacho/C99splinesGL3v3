@@ -213,7 +213,7 @@ int main()
 
     glCheckError(__FILE__, __LINE__);
 
-    Spline splines[numSplines] = { 0 };
+    Spline* splines[numSplines] = { 0 };
 
     float  start[] =
     {
@@ -230,14 +230,14 @@ int main()
         area = (vec4s) { { -hw / 2 + 128, winData.winSize.x - 256,
                            -hh / 2 + 128, winData.winSize.y - 256 } };
         splines[i] = newSpline(area);
-        splines[i].startSprite->pos.x = start[ix++];
-        splines[i].startSprite->pos.y = start[ix++];
-        splines[i].cp1Sprite->pos.x   = start[ix++];
-        splines[i].cp1Sprite->pos.y   = start[ix++];
-        splines[i].cp2Sprite->pos.x   = start[ix++];
-        splines[i].cp2Sprite->pos.y   = start[ix++];
-        splines[i].endSprite->pos.x   = start[ix++];
-        splines[i].endSprite->pos.y   = start[ix++];
+        splines[i]->startSprite->pos.x = start[ix++];
+        splines[i]->startSprite->pos.y = start[ix++];
+        splines[i]->cp1Sprite->pos.x   = start[ix++];
+        splines[i]->cp1Sprite->pos.y   = start[ix++];
+        splines[i]->cp2Sprite->pos.x   = start[ix++];
+        splines[i]->cp2Sprite->pos.y   = start[ix++];
+        splines[i]->endSprite->pos.x   = start[ix++];
+        splines[i]->endSprite->pos.y   = start[ix++];
     }
 
     // -------------------------------------------------------------------
@@ -247,8 +247,10 @@ int main()
     double fpsCount = 0;
     float  FPS      = 0;
     float  fr       = 0; // rotation of text
+    int frames = 0;
 
     while (!glfwWindowShouldClose(window)) {
+        frames++;
         // -------  FPS  ------ (TODO make getFps in utils)
         double thisTime = glfwGetTime(); // Get the current timestamp
         fpsCount++;
@@ -293,7 +295,7 @@ int main()
                 cnode_t* node = SpriteList->head;
                 while (node != NULL) {
                     Sprite* s = (Sprite*)node->data;
-                    if (SpriteInBounds(*s, pointerPos.x, pointerPos.y)) {
+                    if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
                         s->dragOff.x = s->pos.x - pointerPos.x;
                         s->dragOff.y = s->pos.y - pointerPos.y;
                         s->dragging  = true;
@@ -347,12 +349,12 @@ int main()
         if (dumpSplines) {
             for (int i = 0; i < numSplines; i++)
             {
-                Spline s = splines[i];
+                Spline* s = splines[i];
                 printf("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f,\n",
-                       s.startSprite->pos.x, s.startSprite->pos.y,
-                       s.cp1Sprite->pos.x, s.cp1Sprite->pos.y,
-                       s.cp2Sprite->pos.x, s.cp2Sprite->pos.y,
-                       s.endSprite->pos.x, s.endSprite->pos.y);
+                       s->startSprite->pos.x, s->startSprite->pos.y,
+                       s->cp1Sprite->pos.x, s->cp1Sprite->pos.y,
+                       s->cp2Sprite->pos.x, s->cp2Sprite->pos.y,
+                       s->endSprite->pos.x, s->endSprite->pos.y);
             }
         }
         dumpSplines = false;
@@ -366,7 +368,7 @@ int main()
 
         while (node != NULL) {
             Sprite* s = (Sprite*)node->data;
-            if (SpriteInBounds(*s, pointerPos.x, pointerPos.y)) {
+            if (SpriteInBounds(s, pointerPos.x, pointerPos.y)) {
                 s->tint.r = s->otint.r * .6;
                 s->tint.g = s->otint.g * .6;
                 s->tint.b = s->otint.b * .6;
@@ -383,20 +385,21 @@ int main()
 
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, winData.proj);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, -fr, PST);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, PST);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, true,PST);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x/2)+2, (winData.winSize.y/2)-24 } } , 0, false,winData.proj);
+        sprintf(fpsStr, "Frames: %i", frames);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x/2)+2, (-winData.winSize.y/2) } }, 0, false,winData.proj);
 
 
         setSplinePerspective((float*)&PST.raw);
         for (int i = 0; i < numSplines; i++)
         {
-            updateSpline(&splines[i]); // done here to avoid extra loop
+            updateSpline(splines[i]); // done here to avoid extra loop
             renderSpline(splines[i]);
         }
 
         setSpritePerspective((float*)&PST.raw);
-        renderSprite(mouseSprite);
+        renderSprite(&mouseSprite);
         glCheckError(__FILE__, __LINE__);
 
         glfwSwapBuffers(window);

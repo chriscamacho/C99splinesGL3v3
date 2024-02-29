@@ -21,8 +21,8 @@ typedef struct
 
 void initSpline();
 void setSplinePerspective(float* p);
-void renderSpline(Spline s);
-Spline newSpline(vec4s area);
+void renderSpline(Spline* s);
+Spline* newSpline(vec4s area);
 void updateSpline(Spline* s);
 void SplineRelease();
 

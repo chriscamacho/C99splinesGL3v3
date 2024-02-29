@@ -54,20 +54,20 @@ void initSpline()
     glCheckError(__FILE__, __LINE__);
 }
 
-Spline newSpline(vec4s area)
+Spline* newSpline(vec4s area)
 {
-    Spline spline;
+    Spline* spline = calloc(1, sizeof(Spline));
 
-    spline.start       = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
-    spline.cp1         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
-    spline.cp2         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
-    spline.end         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
-    spline.width       = 8;
-    spline.tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
-    spline.startSprite = newSprite(area, 0);
-    spline.cp1Sprite   = newSprite(area, 1);
-    spline.cp2Sprite   = newSprite(area, 2);
-    spline.endSprite   = newSprite(area, 3);
+    spline->start       = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
+    spline->cp1         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
+    spline->cp2         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
+    spline->end         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
+    spline->width       = 8;
+    spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
+    spline->startSprite = newSprite(area, 0);
+    spline->cp1Sprite   = newSprite(area, 1);
+    spline->cp2Sprite   = newSprite(area, 2);
+    spline->endSprite   = newSprite(area, 3);
     return(spline);
 }
 
@@ -86,11 +86,11 @@ void setSplinePerspective(float* p)
     glCheckError(__FILE__, __LINE__);
 }
 
-void renderSpline(Spline s)
+void renderSpline(Spline* s)
 {
     glUseProgram(SplineProgram);
-    glUniform1f(SplineWidthL, s.width);
-    glUniform4f(SplineTintL, s.tint.r, s.tint.g, s.tint.b, s.tint.a);
+    glUniform1f(SplineWidthL, s->width);
+    glUniform4f(SplineTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 
     float* data   = &SplineData[0];
     int    offset = 0;
@@ -99,10 +99,10 @@ void renderSpline(Spline s)
     float  t[STEPS];
     float  b0[STEPS], b1[STEPS], b2[STEPS], b3[STEPS];
 
-    points[0] = s.start;
-    points[1] = s.cp1;
-    points[2] = s.cp2;
-    points[3] = s.end;
+    points[0] = s->start;
+    points[1] = s->cp1;
+    points[2] = s->cp2;
+    points[3] = s->end;
 
     for (int i = 0; i < STEPS; i++)
     {
@@ -113,14 +113,14 @@ void renderSpline(Spline s)
         b2[i] = 3 * t[i] * t[i] * one_minus_t;
         b3[i] = t[i] * t[i] * t[i];
     }
-    data[offset++] = s.start.x;
-    data[offset++] = s.start.y;
+    data[offset++] = s->start.x;
+    data[offset++] = s->start.y;
     for (int i = 0; i < STEPS; i++)
     {
-        vec2s point = (vec2s) { { 0, 0 } };                                             // Initialize point to zero vector
+        vec2s point = (vec2s) { { 0, 0 } };          // Initialize point to zero vector
         for (int j = 0; j < 4; j++)
         {
-            vec2s temp = (vec2s) { { 0, 0 } };                                                             // Initialize temp to zero vector
+            vec2s temp = (vec2s) { { 0, 0 } };          // Initialize temp to zero vector
             if (j == 0) {
                 temp.x = b0[i];
                 temp.y = b0[i];
@@ -144,8 +144,8 @@ void renderSpline(Spline s)
         data[offset++] = point.x;
         data[offset++] = point.y;
     }
-    data[offset++] = s.end.x;
-    data[offset++] = s.end.y;
+    data[offset++] = s->end.x;
+    data[offset++] = s->end.y;
 
     glBindVertexArray(SplineVAO);
     glBindBuffer(GL_ARRAY_BUFFER, SplineVBO);

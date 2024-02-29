@@ -17,9 +17,9 @@ typedef struct _Sprite
 } Sprite;
 
 void initSprites();
-void renderSprite(Sprite s);
+void renderSprite(Sprite* s);
 void setSpritePerspective(float* p);
-bool SpriteInBounds(Sprite s, float x, float y);
+bool SpriteInBounds(Sprite* s, float x, float y);
 Sprite* newSprite(vec4s area, int cpType);
 void SpriteRelease();
 void SpriteRenderAll(float* proj);

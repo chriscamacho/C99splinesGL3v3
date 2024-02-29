@@ -119,7 +119,7 @@ static void derefAndDraw(cnode_t* node)
 {
     Sprite* s = (Sprite*)(node->data);
 
-    renderSprite(*s);
+    renderSprite(s);
 }
 
 void SpriteRenderAll(float* proj)
@@ -128,18 +128,18 @@ void SpriteRenderAll(float* proj)
     clistIterateForward(SpriteList, derefAndDraw);
 }
 
-void renderSprite(Sprite s)
+void renderSprite(Sprite* s)
 {
     glUseProgram(SpriteProgram);
-    glUniform1i(SpriteTexL, s.tex);
-    glUniform4f(SpriteTintL, s.tint.r, s.tint.g, s.tint.b, s.tint.a);
+    glUniform1i(SpriteTexL, s->tex);
+    glUniform4f(SpriteTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 
     float* data = &SpriteData[0];
-    data[0] = s.pos.x;
-    data[1] = s.pos.y;
-    data[2] = s.size.x;
-    data[3] = s.size.y;
-    data[4] = s.rot;
+    data[0] = s->pos.x;
+    data[1] = s->pos.y;
+    data[2] = s->size.x;
+    data[3] = s->size.y;
+    data[4] = s->rot;
 
     glBindVertexArray(SpriteVAO);
     glBindBuffer(GL_ARRAY_BUFFER, SpriteVBO);
@@ -155,25 +155,25 @@ void renderSprite(Sprite s)
     glDisableVertexAttribArray(SpriteRotL);
 }
 
-bool SpriteInBounds(Sprite s, float x, float y)
+bool SpriteInBounds(Sprite* s, float x, float y)
 {
     // "unrotate" the sprite... (reverse rotate the mouse)
-    float tx = x - s.pos.x;
-    float ty = y - s.pos.y;
-    float a  = s.rot * 0.017453292519943;
+    float tx = x - s->pos.x;
+    float ty = y - s->pos.y;
+    float a  = s->rot * 0.017453292519943;
     float rc = cosf(-a);
     float rs = sinf(-a);
     float rx = tx * rc - ty * rs;
     float ry = tx * rs + ty * rc;
 
-    rx = rx + s.pos.x;
-    ry = ry + s.pos.y;
+    rx = rx + s->pos.x;
+    ry = ry + s->pos.y;
 
     // compare with bounding box
-    if (rx > s.pos.x - (s.size.x / 2) &&
-        rx < s.pos.x + (s.size.x / 2) &&
-        ry > s.pos.y - (s.size.y / 2) &&
-        ry < s.pos.y + (s.size.y / 2)) {
+    if (rx > s->pos.x - (s->size.x / 2) &&
+        rx < s->pos.x + (s->size.x / 2) &&
+        ry > s->pos.y - (s->size.y / 2) &&
+        ry < s->pos.y + (s->size.y / 2)) {
         return(true);
     }
     return(false);
