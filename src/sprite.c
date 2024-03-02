@@ -10,7 +10,6 @@
 #include "util.h"
 #include "sprite.h"
 
-// todo make this lot static!
 static GLuint SpriteProgram = 0;
 static GLuint SpriteVAO     = 0;
 static GLuint SpriteVBO     = 0;
@@ -22,6 +21,7 @@ static GLuint SpritePosL   = 0;
 static GLuint SpriteRotL   = 0;
 static GLuint SpriteTexL   = 0;
 static GLuint SpriteTintL  = 0;
+static GLuint SpriteDepthL = 0;
 
 static GLuint SpriteTexture = 0;
 
@@ -79,6 +79,7 @@ void initSprites()
     SpriteAtlasL = glGetUniformLocation(SpriteProgram, "texture0");
     SpriteTexL   = glGetUniformLocation(SpriteProgram, "tex");
     SpriteTintL  = glGetUniformLocation(SpriteProgram, "in_tint");
+    SpriteDepthL = glGetUniformLocation(SpriteProgram, "depth");
 
     SpriteSizeL = glGetAttribLocation(SpriteProgram, "in_size");
     SpritePosL  = glGetAttribLocation(SpriteProgram, "in_position");
@@ -135,9 +136,10 @@ void SpriteRenderAll(mat4s* proj)
 void renderSprite(Sprite* s)
 {
     glUseProgram(SpriteProgram);
-    SpriteProj.raw[3][2] = s->depth;
+
     glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&SpriteProj.raw);
     glUniform1i(SpriteTexL, s->tex);
+    glUniform1f(SpriteDepthL, s->depth);
     glUniform4f(SpriteTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 
     float* data = &SpriteData[0];

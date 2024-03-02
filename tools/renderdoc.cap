@@ -5,7 +5,7 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "/home/chris/development/OpenGL/splinesGL3v3/splinesGL3v3",
+        "executable": "/home/chris/development/OpenGL/C99splinesGL3v3/C99splinesGL3v3",
         "inject": false,
         "numQueuedFrames": 1,
         "options": {
@@ -19,6 +19,7 @@
             "delayForDebugger": 0,
             "hookIntoChildren": true,
             "refAllResources": true,
+            "softMemoryLimit": 0,
             "verifyBufferAccess": true
         },
         "queuedFrameCap": 60,

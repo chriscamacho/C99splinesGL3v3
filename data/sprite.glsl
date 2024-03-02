@@ -8,13 +8,13 @@
 in vec2 in_position;
 in vec2 in_size;
 in float in_rotation;
-
+uniform float depth;
 out vec2 size;
 out float rotation;
 
 void main() {
     // We just pass the values unmodified to the geometry shader
-    gl_Position = vec4(in_position, 0, 1);
+    gl_Position = vec4(in_position, depth, 1);
     size = in_size;
     rotation = in_rotation;
 }
@@ -100,10 +100,9 @@ in vec2 uv;
 out vec4 fragColor;
 
 void main() {
-    
-    fragColor = texture(texture0, vec3(uv, tex)) * in_tint;
-    //fragColor = in_tint;
-
+    vec4 tc = texture(texture0, vec3(uv, tex));
+    //if (tc.a == 0) discard;
+    fragColor = tc * in_tint;
 }
 
 #endif

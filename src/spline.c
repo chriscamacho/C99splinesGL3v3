@@ -18,6 +18,7 @@ static GLuint SplineAaL    = 0;
 static GLuint SplineWidthL = 0;
 static GLuint SplineMiterL = 0;
 static GLuint SplineProjL  = 0;
+static GLuint SplineDepthL = 0;
 
 static GLuint SplinePosL = 0;
 
@@ -40,6 +41,7 @@ void initSpline()
     SplineWidthL = glGetUniformLocation(SplineProgram, "linewidth");
     SplineMiterL = glGetUniformLocation(SplineProgram, "miter_limit");
     SplineProjL  = glGetUniformLocation(SplineProgram, "projection");
+    SplineDepthL = glGetUniformLocation(SplineProgram, "depth");
 
     SplinePosL = glGetAttribLocation(SplineProgram, "position");
 
@@ -68,7 +70,7 @@ Spline* newSpline(vec4s area)
     spline->cp2         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->end         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->width       = 8;
-    spline->depth       = .99;
+    spline->depth       = .6;
     spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
     spline->startSprite = newSprite(area, 0);
     spline->cp1Sprite   = newSprite(area, 1);
@@ -96,9 +98,9 @@ void setSplinePerspective(mat4s* p)
 void renderSpline(Spline* s)
 {
     glUseProgram(SplineProgram);
-    SplineProj.raw[3][2] = s->depth;
     glUniformMatrix4fv(SplineProjL, 1, GL_FALSE, (float*)&SplineProj.raw);
     glUniform1f(SplineWidthL, s->width);
+    glUniform1f(SplineDepthL, s->depth);
     glUniform4f(SplineTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 
     float* data   = &SplineData[0];

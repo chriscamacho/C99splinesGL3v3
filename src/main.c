@@ -144,6 +144,7 @@ int main()
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_DEPTH_BITS, 16);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
@@ -186,7 +187,9 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
-    glDepthRange(0, 1.0);
+    glDepthFunc(GL_LEQUAL);
+    glClearDepth(1.0);
+    glDepthRange(0.0, 1.0);
     glDisable(GL_CULL_FACE);
     glClearColor(.2, .2, .2, 1.f);
 
@@ -243,7 +246,7 @@ int main()
     mouseSprite->size.x    = 64;
     mouseSprite->size.y    = 64;
     mouseSprite->draggable = false;
-    mouseSprite->depth     = 0;
+    mouseSprite->depth     = .99;
 
     // -------------------------------------------------------------------
     //                          main loop
@@ -396,8 +399,8 @@ int main()
 
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, 0.1, fr, true, PST);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .1, 0, false, winData.proj);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, .9, fr, true, PST);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .9, 0, false, winData.proj);
         sprintf(fpsStr, "Frames: %i", frames);
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .9, 0, false, winData.proj);
 
