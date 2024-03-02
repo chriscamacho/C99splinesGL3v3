@@ -49,7 +49,7 @@ vec4 stroke(float distance, float linewidth, float antialias, vec4 color)
     {
         frag_color = vec4(color.rgb, color.a * alpha);
     }
-
+    if (frag_color.a < 0.5) discard;
     return frag_color;
 }
 

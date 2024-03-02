@@ -115,7 +115,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     }
     wd->zoom.y = wd->zoom.x;
 
-    printf("zoom %.2f\n", wd->zoom.x);
+    //printf("zoom %.2f\n", wd->zoom.x);
 }
 
 // ---------------------------------------------------------------------
@@ -400,7 +400,7 @@ int main()
         sprintf(fpsStr, "FPS: %03.02f", FPS);
         renderText(fpsStr, (vec2s){ { 0, 0 } }, .8, fr, true, PST);
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .8, 0, false, winData.proj);
-        sprintf(fpsStr, "Frames: %i", frames);
+        sprintf(fpsStr, "Zoom: %.2f Frames: %i", winData.zoom.x, frames);
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .8, 0, false, winData.proj);
 
 

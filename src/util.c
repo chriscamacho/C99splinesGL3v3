@@ -33,7 +33,7 @@ GLuint initElementArrayBuffer(GLuint Bo, float* data, GLuint location,
 // random float between start and start+range
 float rnd(float start, float range)
 {
-    return(start + range * ((float)rand() / RAND_MAX));
+    return(start + range * ((float)rand() / (float)RAND_MAX));
 }
 
 // creates a shader from text
