@@ -3,7 +3,7 @@
 
 #include <cglm/struct/vec2.h>
 
-void renderText(const char* text, vec2s p, float r, bool centre, mat4s M);
+void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s M);
 void initText();
 
 #endif

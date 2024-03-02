@@ -91,7 +91,7 @@ static void windowSizeCallback(GLFWwindow* window, int w, int h)
 
     wd->winSize = glms_vec2_make((vec2) { w, h });
     vec2s    ws = wd->winSize;
-    wd->proj = glms_ortho(-ws.x / 2, ws.x / 2, -ws.y / 2, ws.y / 2, 0, 1);
+    wd->proj = glms_ortho(-ws.x / 2, ws.x / 2, -ws.y / 2, ws.y / 2, 0, 1.0);
     glViewport(0, 0, ws.x, ws.y);
 }
 
@@ -185,6 +185,9 @@ int main()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthRange(0, 1.0);
+    glDisable(GL_CULL_FACE);
     glClearColor(.2, .2, .2, 1.f);
 
     // manually call to ensure proj matrix set
@@ -240,6 +243,7 @@ int main()
     mouseSprite->size.x    = 64;
     mouseSprite->size.y    = 64;
     mouseSprite->draggable = false;
+    mouseSprite->depth     = 0;
 
     // -------------------------------------------------------------------
     //                          main loop
@@ -330,7 +334,7 @@ int main()
         }
 
         CGLM_ALIGN(16) mat4s PST = combinedMatrix(&winData);
-        setSpritePerspective((float*)&PST.raw);
+        setSpritePerspective(&PST);
 
         // unproject then account for pan and zoom on mouse
         CGLM_ALIGN(16) mat4s inv = glms_mat4_inv(PST);
@@ -367,7 +371,7 @@ int main()
         //--------------------------------------------------------------
         //                    Render
         //--------------------------------------------------------------
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cnode_t* node = SpriteList->head;
 
@@ -392,13 +396,15 @@ int main()
 
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, fr, true, PST);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, 0, false, winData.proj);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, 0.1, fr, true, PST);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .1, 0, false, winData.proj);
         sprintf(fpsStr, "Frames: %i", frames);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, 0, false, winData.proj);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .9, 0, false, winData.proj);
 
-        SplineRenderAll((float*)&PST.raw);
-        SpriteRenderAll((float*)&PST.raw);
+
+        SplineRenderAll(&PST);
+
+        SpriteRenderAll(&PST);
 
         //setSpritePerspective((float*)&PST.raw);
         //renderSprite(&mouseSprite);

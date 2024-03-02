@@ -27,8 +27,10 @@ static GLuint SpriteTexture = 0;
 
 static float  SpriteData[5 * sizeof(float)];
 
+CGLM_ALIGN(16) mat4s SpriteProj;
+
 // not static so other headers can extern it if needed
-clist_t*      SpriteList;
+clist_t* SpriteList;
 
 Sprite* newSprite(vec4s area, int cpType)
 {
@@ -37,9 +39,10 @@ Sprite* newSprite(vec4s area, int cpType)
     s->pos.x = rnd(area.x, area.y);
     s->pos.y = rnd(area.z, area.w);
 
-    s->size = (vec2s) { { 32, 32 } };
-    s->rot  = 0;
-    s->tex  = 96;
+    s->size  = (vec2s) { { 32, 32 } };
+    s->rot   = 0;
+    s->depth = .5;
+    s->tex   = 96;
 
     switch (cpType) {
     case 0:
@@ -109,10 +112,10 @@ void initSprites()
 // and an endSprites that switches them all off...
 // so beginsprites, render all sprites, endsprites....
 
-void setSpritePerspective(float* p)
+void setSpritePerspective(mat4s* p)
 {
     glUseProgram(SpriteProgram);
-    glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, p);
+    SpriteProj = *p;
     glActiveTexture(GL_TEXTURE0);
 }
 
@@ -123,7 +126,7 @@ static void derefAndDraw(cnode_t* node)
     renderSprite(s);
 }
 
-void SpriteRenderAll(float* proj)
+void SpriteRenderAll(mat4s* proj)
 {
     setSpritePerspective(proj);
     clistIterateForward(SpriteList, derefAndDraw);
@@ -132,6 +135,8 @@ void SpriteRenderAll(float* proj)
 void renderSprite(Sprite* s)
 {
     glUseProgram(SpriteProgram);
+    SpriteProj.raw[3][2] = s->depth;
+    glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&SpriteProj.raw);
     glUniform1i(SpriteTexL, s->tex);
     glUniform4f(SpriteTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 

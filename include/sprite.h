@@ -11,6 +11,7 @@ typedef struct _Sprite
     bool   dragging;
     bool   draggable;
     vec2s  size;
+    float  depth;
     float  rot;
     GLuint tex;
     CGLM_ALIGN(16) vec4s tint;
@@ -19,10 +20,10 @@ typedef struct _Sprite
 
 void initSprites();
 void renderSprite(Sprite* s);
-void setSpritePerspective(float* p);
+void setSpritePerspective(mat4s* p);
 bool SpriteInBounds(Sprite* s, float x, float y);
 Sprite* newSprite(vec4s area, int cpType);
 void SpriteRelease();
-void SpriteRenderAll(float* proj);
+void SpriteRenderAll(mat4s* proj);
 
 #endif
