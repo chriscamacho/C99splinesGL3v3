@@ -17,11 +17,11 @@ https://github.com/rougier/python-opengl/blob/master/code/chapter-09/geom-path.p
 #if defined VERTEX_SHADER
 
 in vec2 position;
-uniform float depth;
+
 
 void main()
 {
-    gl_Position = vec4(position, depth, 1.0);
+    gl_Position = vec4(position, 0, 1.0);
 }
 
 #elif defined FRAGMENT_SHADER
@@ -80,6 +80,7 @@ uniform vec4  color;
 uniform float antialias;
 uniform float linewidth;
 uniform float miter_limit;
+uniform float depth;
 
 in float v_length;
 in vec2  v_caps;
@@ -120,9 +121,9 @@ void main()
     }
 
     vec4 sc = stroke(distance, linewidth, antialias, color);
-    //if (sc.a == 0) discard;
+    if (sc.a == 0) discard;
     fragColor = sc;
-
+    gl_FragDepth = depth;
 }
 
 #elif defined GEOMETRY_SHADER

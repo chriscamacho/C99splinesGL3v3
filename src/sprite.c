@@ -41,7 +41,7 @@ Sprite* newSprite(vec4s area, int cpType)
 
     s->size  = (vec2s) { { 32, 32 } };
     s->rot   = 0;
-    s->depth = .5;
+    s->depth = .6;
     s->tex   = 96;
 
     switch (cpType) {

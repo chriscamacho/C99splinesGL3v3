@@ -26,7 +26,6 @@ void initText()
 
 void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s M)
 {
-    tr.depth = d;
     CGLM_ALIGN(16) vec3s tv = (vec3s){ { p.x, p.y, 0 } };
     CGLM_ALIGN(16) mat4s T  = glms_mat4_ucopy(M);
     T = glms_translate(T, tv);

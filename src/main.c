@@ -246,7 +246,7 @@ int main()
     mouseSprite->size.x    = 64;
     mouseSprite->size.y    = 64;
     mouseSprite->draggable = false;
-    mouseSprite->depth     = .99;
+    mouseSprite->depth     = 0;
 
     // -------------------------------------------------------------------
     //                          main loop
@@ -398,10 +398,10 @@ int main()
 
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, .9, fr, true, PST);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .9, 0, false, winData.proj);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, .8, fr, true, PST);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .8, 0, false, winData.proj);
         sprintf(fpsStr, "Frames: %i", frames);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .9, 0, false, winData.proj);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .8, 0, false, winData.proj);
 
 
         SplineRenderAll(&PST);

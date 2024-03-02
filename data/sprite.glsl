@@ -8,13 +8,13 @@
 in vec2 in_position;
 in vec2 in_size;
 in float in_rotation;
-uniform float depth;
 out vec2 size;
 out float rotation;
+out float g_depth;
 
 void main() {
     // We just pass the values unmodified to the geometry shader
-    gl_Position = vec4(in_position, depth, 1);
+    gl_Position = vec4(in_position, 0, 1);
     size = in_size;
     rotation = in_rotation;
 }
@@ -30,11 +30,13 @@ layout (triangle_strip, max_vertices = 4) out;
 
 uniform mat4 projection;
 
+
 // Since geometry shader can take multiple values from a vertex
 // shader we need to define the inputs from it as arrays.
 // In our instance we just take single values (points)
 in vec2 size[];
 in float rotation[];
+
 
 // Outputs to fragment shader
 out vec2 uv;
@@ -43,6 +45,7 @@ out vec2 uv;
 void main() {
     // We grab the position value from the vertex shader
     vec2 center = gl_in[0].gl_Position.xy;
+    
     // Calculate the half size of the sprites for easier calculations
     vec2 hsize = size[0] / 2.0;
     // Convert the rotation to radians
@@ -63,22 +66,22 @@ void main() {
     // run of a vertex shader, but in geomtry shaders we can do it multiple times!
 
     // Upper left
-    gl_Position = projection * vec4(rot * vec2(-hsize.x, hsize.y) + center, 0.0, 1.0);
+    gl_Position = projection * vec4(rot * vec2(-hsize.x, hsize.y) + center, 0, 1.0);
     uv = vec2(0, 1);
     EmitVertex();
 
     // lower left
-    gl_Position = projection * vec4(rot * vec2(-hsize.x, -hsize.y) + center, 0.0, 1.0);
+    gl_Position = projection * vec4(rot * vec2(-hsize.x, -hsize.y) + center, 0, 1.0);
     uv = vec2(0, 0);
     EmitVertex();
 
     // upper right
-    gl_Position = projection * vec4(rot * vec2(hsize.x, hsize.y) + center, 0.0, 1.0);
+    gl_Position = projection * vec4(rot * vec2(hsize.x, hsize.y) + center, 0, 1.0);
     uv = vec2(1, 1);
     EmitVertex();
 
     // lower right
-    gl_Position = projection * vec4(rot * vec2(hsize.x, -hsize.y) + center, 0.0, 1.0);
+    gl_Position = projection * vec4(rot * vec2(hsize.x, -hsize.y) + center, 0, 1.0);
     uv = vec2(1, 0);
     EmitVertex();
 
@@ -94,15 +97,19 @@ uniform sampler2DArray texture0;
 
 uniform vec4 in_tint;
 uniform int tex;
+uniform float depth;
 
 in vec2 uv;
 
 out vec4 fragColor;
 
+
 void main() {
     vec4 tc = texture(texture0, vec3(uv, tex));
-    //if (tc.a == 0) discard;
+    if (tc.a == 0) discard;
     fragColor = tc * in_tint;
+    gl_FragDepth = depth;
+    
 }
 
 #endif

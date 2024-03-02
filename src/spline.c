@@ -70,7 +70,7 @@ Spline* newSpline(vec4s area)
     spline->cp2         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->end         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->width       = 8;
-    spline->depth       = .6;
+    spline->depth       = .4;
     spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
     spline->startSprite = newSprite(area, 0);
     spline->cp1Sprite   = newSprite(area, 1);
