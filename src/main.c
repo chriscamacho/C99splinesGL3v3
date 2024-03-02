@@ -394,7 +394,6 @@ int main()
             node = node->next;
         }
 
-
         char fpsStr[80] = { 0 };
 
         fr += 0.01;
@@ -406,11 +405,9 @@ int main()
 
 
         SplineRenderAll(&PST);
+        glCheckError(__FILE__, __LINE__);
 
         SpriteRenderAll(&PST);
-
-        //setSpritePerspective((float*)&PST.raw);
-        //renderSprite(&mouseSprite);
         glCheckError(__FILE__, __LINE__);
 
         glfwSwapBuffers(window);
