@@ -21,12 +21,14 @@ void initText()
     tr.otint    = tr.tint;
     tr.dragOff  = (vec2s)GLMS_VEC2_ZERO_INIT;
     tr.dragging = false;
+    tr.depth    = 0;
 }
 
-void renderText(const char* text, vec2s p, float r, bool centre, mat4s M)
+void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s M)
 {
     CGLM_ALIGN(16) vec3s tv = (vec3s){ { p.x, p.y, 0 } };
     CGLM_ALIGN(16) mat4s T  = glms_mat4_ucopy(M);
+    T.raw[3][2] = 0;
     T = glms_translate(T, tv);
     T = glms_rotate_z(T, r);
     float l  = strlen(text) * 6;
@@ -35,10 +37,10 @@ void renderText(const char* text, vec2s p, float r, bool centre, mat4s M)
         l  = -6;
         ly = 12;
     }
-    tv = (vec3s){ { -l, ly, 0 } };
+    tv = (vec3s){ { -l, ly, -d } };
     T  = glms_translate(T, tv);
 
-    setSpritePerspective((float*)T.raw);
+    setSpritePerspective(&T);
 
     tr.pos = GLMS_VEC2_ZERO;
     char c = text[0];

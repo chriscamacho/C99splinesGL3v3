@@ -12,6 +12,7 @@ typedef struct
     vec2s   cp1;
     vec2s   cp2;
     float   width;
+    float   depth;
     CGLM_ALIGN(16) vec4s tint;
     Sprite* startSprite;
     Sprite* cp1Sprite;
@@ -20,11 +21,11 @@ typedef struct
 } Spline;
 
 void initSpline();
-void setSplinePerspective(float* p);
+void setSplinePerspective(mat4s* p);
 void renderSpline(Spline* s);
 Spline* newSpline(vec4s area);
 void updateSpline(Spline* s);
 void SplineRelease();
-void SplineRenderAll(float* p);
+void SplineRenderAll(mat4s* p);
 
 #endif

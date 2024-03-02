@@ -27,6 +27,7 @@ static GLuint SplineVAO = 0;
 static GLuint SplineVBO = 0;
 
 clist_t*      SplineList;
+CGLM_ALIGN(16) mat4s SplineProj;
 
 void initSpline()
 {
@@ -67,6 +68,7 @@ Spline* newSpline(vec4s area)
     spline->cp2         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->end         = (vec2s) { { rnd(area.x, area.y), rnd(area.z, area.w) } };
     spline->width       = 8;
+    spline->depth       = .99;
     spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
     spline->startSprite = newSprite(area, 0);
     spline->cp1Sprite   = newSprite(area, 1);
@@ -84,16 +86,18 @@ void updateSpline(Spline* s)
     s->end   = s->endSprite->pos;
 }
 
-void setSplinePerspective(float* p)
+void setSplinePerspective(mat4s* p)
 {
     glUseProgram(SplineProgram);
-    glUniformMatrix4fv(SplineProjL, 1, GL_FALSE, p);
+    SplineProj = *p;
     glCheckError(__FILE__, __LINE__);
 }
 
 void renderSpline(Spline* s)
 {
     glUseProgram(SplineProgram);
+    SplineProj.raw[3][2] = s->depth;
+    glUniformMatrix4fv(SplineProjL, 1, GL_FALSE, (float*)&SplineProj.raw);
     glUniform1f(SplineWidthL, s->width);
     glUniform4f(SplineTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
 
@@ -163,7 +167,7 @@ void renderSpline(Spline* s)
     glCheckError(__FILE__, __LINE__);
 }
 
-void SplineRenderAll(float* proj)
+void SplineRenderAll(mat4s* proj)
 {
     setSplinePerspective(proj);
     cnode_t* node = SplineList->head;
