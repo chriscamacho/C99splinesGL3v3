@@ -3,6 +3,15 @@
 
 #include "gl_core_3_3.h"
 #include <cglm/struct/vec2.h>
+#include "clist.h"
+
+typedef struct _SpriteSet
+{
+    clist_t* SpriteList;
+    GLuint   textureUnit;
+    GLuint   SpriteTexture;
+    CGLM_ALIGN(16) mat4s SpriteProj;
+} SpriteSet;
 
 typedef struct _Sprite
 {
@@ -22,8 +31,12 @@ void initSprites();
 void renderSprite(Sprite* s);
 void setSpritePerspective(mat4s* p);
 bool SpriteInBounds(Sprite* s, float x, float y);
-Sprite* newSprite(vec4s area, int cpType);
+Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType);
 void SpriteRelease();
-void SpriteRenderAll(mat4s* proj);
+void SpriteRenderAll();
+
+SpriteSet* createSpriteSet(const char* fileName, int tu, int width, int height, int n);
+void spriteSetRelease(SpriteSet* ss);
+void useSpriteSet(SpriteSet* ss, mat4s* p);
 
 #endif

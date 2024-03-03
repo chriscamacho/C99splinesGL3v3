@@ -161,7 +161,7 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, 1); // polls show us key states instead of events
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, 1); // polls show us key states
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
     glfwSwapInterval(1);
 
@@ -196,6 +196,7 @@ int main()
     // manually call to ensure proj matrix set
     windowSizeCallback(window, Iwidth, Iheight);
 
+
     initSpline();
     glCheckError(__FILE__, __LINE__);
 
@@ -205,11 +206,22 @@ int main()
     initText();  // set up the text renderer
     glCheckError(__FILE__, __LINE__);
 
+    SpriteSet* fontSet = createSpriteSet("data/font.png", 0, 64, 64, 95);
+    glCheckError(__FILE__, __LINE__);
+    SpriteSet* spriteSet = createSpriteSet("data/atlas.png", 1, 256, 256, 6);
 
-    float hw = winData.winSize.x / 2.0;
-    float hh = winData.winSize.y / 2.0;
+    float      hw = winData.winSize.x / 2.0;
+    float      hh = winData.winSize.y / 2.0;
     winData.pan = (vec3s) { { 0, 0, 0.0 } };
 
+    mouseSprite            = newSprite(spriteSet, (vec4s){ { -1, 2, -1, 2 } }, 0);
+    mouseSprite->tint      = (vec4s) { { 0.75, 0.2, 1, 1 } };
+    mouseSprite->tex       = 0;
+    mouseSprite->rot       = 0;
+    mouseSprite->size.x    = 64;
+    mouseSprite->size.y    = 64;
+    mouseSprite->draggable = false;
+    mouseSprite->depth     = 0;
 
     glCheckError(__FILE__, __LINE__);
 
@@ -227,7 +239,7 @@ int main()
         CGLM_ALIGN(16) vec4s area;
         area = (vec4s) { { -hw / 2 + 128, winData.winSize.x - 256,
                            -hh / 2 + 128, winData.winSize.y - 256 } };
-        Spline* s = newSpline(area);
+        Spline* s = newSpline(spriteSet, area);
         s->startSprite->pos.x = start[ix++];
         s->startSprite->pos.y = start[ix++];
         s->cp1Sprite->pos.x   = start[ix++];
@@ -237,16 +249,6 @@ int main()
         s->endSprite->pos.x   = start[ix++];
         s->endSprite->pos.y   = start[ix++];
     }
-
-
-    mouseSprite            = newSprite((vec4s){ { -1, 2, -1, 2 } }, 0);
-    mouseSprite->tint      = (vec4s) { { 0.75, 0.2, 1, 1 } };
-    mouseSprite->tex       = 95;
-    mouseSprite->rot       = 0;
-    mouseSprite->size.x    = 64;
-    mouseSprite->size.y    = 64;
-    mouseSprite->draggable = false;
-    mouseSprite->depth     = 0;
 
     // -------------------------------------------------------------------
     //                          main loop
@@ -300,7 +302,7 @@ int main()
         // sprite dragging
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             if (!dragging) { // offset captured only at drag start
-                cnode_t* node = SpriteList->head;
+                cnode_t* node = spriteSet->SpriteList->head;
                 while (node != NULL) {
                     Sprite* s = (Sprite*)node->data;
                     if (s->draggable) {
@@ -314,7 +316,7 @@ int main()
                 }
                 dragging = true;
             } else { // actually dragging sprites
-                cnode_t* node = SpriteList->head;
+                cnode_t* node = spriteSet->SpriteList->head;
                 while (node != NULL) {
                     Sprite* s = (Sprite*)node->data;
                     if (s->dragging) {
@@ -326,7 +328,7 @@ int main()
             }
         } else { // button up, is still dragging reset all drag states
             if (dragging) {
-                cnode_t* node = SpriteList->head;
+                cnode_t* node = spriteSet->SpriteList->head;
                 while (node != NULL) {
                     Sprite* s = (Sprite*)node->data;
                     s->dragging = false;
@@ -337,7 +339,6 @@ int main()
         }
 
         CGLM_ALIGN(16) mat4s PST = combinedMatrix(&winData);
-        setSpritePerspective(&PST);
 
         // unproject then account for pan and zoom on mouse
         CGLM_ALIGN(16) mat4s inv = glms_mat4_inv(PST);
@@ -371,13 +372,7 @@ int main()
             dumpSplines = false;
         }
 
-        //--------------------------------------------------------------
-        //                    Render
-        //--------------------------------------------------------------
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        cnode_t* node = SpriteList->head;
-
+        cnode_t* node = spriteSet->SpriteList->head;
         while (node != NULL) {
             Sprite* s = (Sprite*)node->data;
             if (s->draggable) {
@@ -394,20 +389,26 @@ int main()
             node = node->next;
         }
 
-        char fpsStr[80] = { 0 };
+        //--------------------------------------------------------------
+        //                    Render
+        //--------------------------------------------------------------
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        char fpsStr[80] = { 0 };
         fr += 0.01;
         sprintf(fpsStr, "FPS: %03.02f", FPS);
-        renderText(fpsStr, (vec2s){ { 0, 0 } }, .8, fr, true, PST);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .8, 0, false, winData.proj);
-        sprintf(fpsStr, "Zoom: %.2f Frames: %i", winData.zoom.x, frames);
-        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .8, 0, false, winData.proj);
+        useSpriteSet(fontSet, &PST);
+        renderText(fpsStr, (vec2s){ { 0, 0 } }, .8, fr, true, fontSet);
 
+        useSpriteSet(fontSet, &winData.proj);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .8, 0, false, fontSet);
+        sprintf(fpsStr, "Zoom: %.2f Frames: %i", winData.zoom.x, frames);
+        renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .8, 0, false, fontSet);
 
         SplineRenderAll(&PST);
         glCheckError(__FILE__, __LINE__);
-
-        SpriteRenderAll(&PST);
+        useSpriteSet(spriteSet, &PST);
+        SpriteRenderAll();
         glCheckError(__FILE__, __LINE__);
 
         glfwSwapBuffers(window);
@@ -420,6 +421,8 @@ int main()
 
     SpriteRelease(); // free sprites first.
     SplineRelease();
+    spriteSetRelease(fontSet);
+    spriteSetRelease(spriteSet);
 
     glCheckError(__FILE__, __LINE__);
 

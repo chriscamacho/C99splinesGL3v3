@@ -46,7 +46,7 @@ void initSpline()
     SplinePosL = glGetAttribLocation(SplineProgram, "position");
 
     glUniform1f(SplineMiterL, -1); // never (don't!) changes...
-    glUniform1f(SplineAaL, 1);     // has as property of Spline ???
+    glUniform1f(SplineAaL, 1);     // have as property of Spline ???
 
     glGenVertexArrays(1, &SplineVAO);
     glBindVertexArray(SplineVAO);
@@ -61,7 +61,7 @@ void initSpline()
     glCheckError(__FILE__, __LINE__);
 }
 
-Spline* newSpline(vec4s area)
+Spline* newSpline(SpriteSet* ss, vec4s area)
 {
     Spline* spline = calloc(1, sizeof(Spline));
 
@@ -72,10 +72,10 @@ Spline* newSpline(vec4s area)
     spline->width       = 8;
     spline->depth       = .4;
     spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
-    spline->startSprite = newSprite(area, 0);
-    spline->cp1Sprite   = newSprite(area, 1);
-    spline->cp2Sprite   = newSprite(area, 2);
-    spline->endSprite   = newSprite(area, 3);
+    spline->startSprite = newSprite(ss, area, 0);
+    spline->cp1Sprite   = newSprite(ss, area, 1);
+    spline->cp2Sprite   = newSprite(ss, area, 2);
+    spline->endSprite   = newSprite(ss, area, 3);
     clistAddNode(SplineList, spline);
     return(spline);
 }

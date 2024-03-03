@@ -23,7 +23,7 @@ typedef struct
 void initSpline();
 void setSplinePerspective(mat4s* p);
 void renderSpline(Spline* s);
-Spline* newSpline(vec4s area);
+Spline* newSpline(SpriteSet* ss, vec4s area);
 void updateSpline(Spline* s);
 void SplineRelease();
 void SplineRenderAll(mat4s* p);

@@ -272,6 +272,7 @@ void glCheckError(const char* f, int l)
         return;
     }
     fprintf(stderr, "%s line %i: %s\n", f, l, glErrorString(e));
+    exit(-e);
 }
 
 // returns a texture handle from an image filename

@@ -10,29 +10,23 @@
 #include "util.h"
 #include "sprite.h"
 
-static GLuint SpriteProgram = 0;
-static GLuint SpriteVAO     = 0;
-static GLuint SpriteVBO     = 0;
+static GLuint     SpriteProgram = 0;
+static GLuint     SpriteVAO     = 0;
+static GLuint     SpriteVBO     = 0;
 
-static GLuint SpriteProjL  = 0;
-static GLuint SpriteSizeL  = 0;
-static GLuint SpriteAtlasL = 0;
-static GLuint SpritePosL   = 0;
-static GLuint SpriteRotL   = 0;
-static GLuint SpriteTexL   = 0;
-static GLuint SpriteTintL  = 0;
-static GLuint SpriteDepthL = 0;
+static GLuint     SpriteProjL  = 0;
+static GLuint     SpriteSizeL  = 0;
+static GLuint     SpriteAtlasL = 0;
+static GLuint     SpritePosL   = 0;
+static GLuint     SpriteRotL   = 0;
+static GLuint     SpriteTexL   = 0;
+static GLuint     SpriteTintL  = 0;
+static GLuint     SpriteDepthL = 0;
 
-static GLuint SpriteTexture = 0;
+static float      SpriteData[5 * sizeof(float)];
+static SpriteSet* currentSpriteSet;
 
-static float  SpriteData[5 * sizeof(float)];
-
-CGLM_ALIGN(16) mat4s SpriteProj;
-
-// not static so other headers can extern it if needed
-clist_t* SpriteList;
-
-Sprite* newSprite(vec4s area, int cpType)
+Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType)
 {
     Sprite* s = calloc(1, sizeof(Sprite));
 
@@ -42,8 +36,9 @@ Sprite* newSprite(vec4s area, int cpType)
     s->size  = (vec2s) { { 32, 32 } };
     s->rot   = 0;
     s->depth = .6;
-    s->tex   = 96;
+    s->tex   = 1;
 
+    // TODO remove this too spline specific ! (param for tint)
     switch (cpType) {
     case 0:
         s->tint = (vec4s) { { 1, 0, 0, 1 } };
@@ -65,13 +60,12 @@ Sprite* newSprite(vec4s area, int cpType)
     s->dragOff   = (vec2s)GLMS_VEC2_ZERO_INIT;
     s->dragging  = false;
     s->draggable = true;
-    clistAddNode(SpriteList, s);
+    clistAddNode(ss->SpriteList, s);
     return(s);
 }
 
 void initSprites()
 {
-    SpriteList    = clistCreateList();
     SpriteProgram = createProgramGlsl("data/sprite.glsl", true);
     glUseProgram(SpriteProgram);
 
@@ -103,23 +97,78 @@ void initSprites()
     // can currently only have one atlas, have a way to load multiple
     // and select which one to use.
     //SpriteTexture = loadTextureAtlas("data/atlas.png", 256, 256, 6);
-    SpriteTexture = loadTextureAtlas("data/font.png", 64, 64, 97);
-    glUniform1i(SpriteAtlasL, 0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, SpriteTexture);
+    //SpriteTexture = loadTextureAtlas("data/font.png", 64, 64, 97);
+    //glUniform1i(SpriteAtlasL, 0);
+    //glBindTexture(GL_TEXTURE_2D_ARRAY, SpriteTexture);
     glCheckError(__FILE__, __LINE__);
 }
 
-// have a beginSprites that sets proj and activates the buffers etc
-// and an endSprites that switches them all off...
-// so beginsprites, render all sprites, endsprites....
-
-void setSpritePerspective(mat4s* p)
+/**
+ * Creates a sprite set
+ *
+ * Sprite sets are a list of sprites and what texture is used to render
+ * them you must call useSpriteSet before rendering sprites
+ *
+ * @param[in] fileName the image to use for the texture it must be width wide and height * n high
+ * @param[in] tu texture unit to use
+ * @param[in] width the width of 1 sprite
+ * @param[in] height the height of 1 sprite
+ * @param[in] n number of sprites in the texture
+ * @param[out] SpriteSet*
+ */
+SpriteSet* createSpriteSet(const char* fileName, int tu, int width, int height, int n)
 {
+    SpriteSet* ss = calloc(1, sizeof(SpriteSet));
+
+    ss->SpriteList = clistCreateList();
     glUseProgram(SpriteProgram);
-    SpriteProj = *p;
-    glActiveTexture(GL_TEXTURE0);
+    glCheckError(__FILE__, __LINE__);
+    ss->SpriteTexture = loadTextureAtlas(fileName, width, height, n);
+    glCheckError(__FILE__, __LINE__);
+    ss->textureUnit = tu;
+    glCheckError(__FILE__, __LINE__);
+    glUniform1i(SpriteAtlasL, tu);
+    glCheckError(__FILE__, __LINE__);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, ss->SpriteTexture);
+    glCheckError(__FILE__, __LINE__);
+    return(ss);
 }
 
+void spriteSetRelease(SpriteSet* ss)
+{
+    cnode_t* node = ss->SpriteList->head;
+
+    while (node != NULL) {
+        Sprite* s = (Sprite*)node->data;
+        free(s);
+        node = node->next;
+    }
+    clistFreeList(&ss->SpriteList);
+    free(ss);
+}
+
+void useSpriteSet(SpriteSet* ss, mat4s* p)
+{
+    currentSpriteSet = ss;
+    glUseProgram(SpriteProgram);
+    glEnableVertexAttribArray(SpritePosL);
+    glEnableVertexAttribArray(SpriteSizeL);
+    glEnableVertexAttribArray(SpriteRotL);
+    ss->SpriteProj = *p;
+    glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&(ss->SpriteProj.raw));
+    glActiveTexture(GL_TEXTURE0 + ss->textureUnit);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, ss->SpriteTexture);
+    glUniform1i(SpriteAtlasL, ss->textureUnit);
+}
+
+/*
+ * void setSpritePerspective(mat4s* p)
+ * {
+ *  glUseProgram(SpriteProgram);
+ *  SpriteProj = *p;
+ *  glActiveTexture(GL_TEXTURE0);
+ * }
+ */
 static void derefAndDraw(cnode_t* node)
 {
     Sprite* s = (Sprite*)(node->data);
@@ -127,17 +176,18 @@ static void derefAndDraw(cnode_t* node)
     renderSprite(s);
 }
 
-void SpriteRenderAll(mat4s* proj)
+// todo should there be a current SpriteSet so this doesn't need a param ?
+void SpriteRenderAll()
 {
-    setSpritePerspective(proj);
-    clistIterateForward(SpriteList, derefAndDraw);
+    //setSpritePerspective(proj);
+    clistIterateForward(currentSpriteSet->SpriteList, derefAndDraw);
 }
 
 void renderSprite(Sprite* s)
 {
-    glUseProgram(SpriteProgram);
+    //glUseProgram(SpriteProgram);
 
-    glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&SpriteProj.raw);
+    //glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&SpriteProj.raw);
     glUniform1i(SpriteTexL, s->tex);
     glUniform1f(SpriteDepthL, s->depth);
     glUniform4f(SpriteTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
@@ -152,15 +202,15 @@ void renderSprite(Sprite* s)
     glBindVertexArray(SpriteVAO);
     glBindBuffer(GL_ARRAY_BUFFER, SpriteVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(SpriteData), &SpriteData[0], GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(SpritePosL);
-    glEnableVertexAttribArray(SpriteSizeL);
-    glEnableVertexAttribArray(SpriteRotL);
+    //glEnableVertexAttribArray(SpritePosL);
+    //glEnableVertexAttribArray(SpriteSizeL);
+    //glEnableVertexAttribArray(SpriteRotL);
 
     glDrawArrays(GL_POINTS, 0, 1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDisableVertexAttribArray(SpritePosL);
-    glDisableVertexAttribArray(SpriteSizeL);
-    glDisableVertexAttribArray(SpriteRotL);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glDisableVertexAttribArray(SpritePosL);
+    //glDisableVertexAttribArray(SpriteSizeL);
+    //glDisableVertexAttribArray(SpriteRotL);
 }
 
 bool SpriteInBounds(Sprite* s, float x, float y)
@@ -190,11 +240,4 @@ bool SpriteInBounds(Sprite* s, float x, float y)
 void SpriteRelease()
 {
     glDeleteProgram(SpriteProgram);
-    cnode_t* node = SpriteList->head;
-    while (node != NULL) {
-        Sprite* s = (Sprite*)node->data;
-        free(s);
-        node = node->next;
-    }
-    clistFreeList(&SpriteList);
 }

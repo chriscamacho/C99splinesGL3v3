@@ -14,6 +14,7 @@ Sprite tr;
 
 void initText()
 {
+    // use a single sprite to render each character
     tr.size     = (vec2s) { { 12, 24 } };
     tr.rot      = 0;
     tr.tex      = 96;
@@ -24,10 +25,11 @@ void initText()
     tr.depth    = 0;
 }
 
-void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s M)
+void renderText(const char* text, vec2s p, float d, float r, bool centre, SpriteSet* ss)
 {
+    CGLM_ALIGN(16) mat4s R  = glms_mat4_ucopy(ss->SpriteProj);
     CGLM_ALIGN(16) vec3s tv = (vec3s){ { p.x, p.y, 0 } };
-    CGLM_ALIGN(16) mat4s T  = glms_mat4_ucopy(M);
+    CGLM_ALIGN(16) mat4s T  = glms_mat4_ucopy(ss->SpriteProj);
     T = glms_translate(T, tv);
     T = glms_rotate_z(T, r);
     float l  = strlen(text) * 6;
@@ -39,8 +41,7 @@ void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s 
     tv = (vec3s){ { -l, ly, 0 } };
     T  = glms_translate(T, tv);
 
-    setSpritePerspective(&T);
-
+    useSpriteSet(ss, &T);
     tr.pos = GLMS_VEC2_ZERO;
     char c = text[0];
     int  i = 1;
@@ -50,4 +51,6 @@ void renderText(const char* text, vec2s p, float d, float r, bool centre, mat4s 
         tr.pos.x += 12;
         c         = text[i++];
     }
+    // restore sprite set matrix
+    ss->SpriteProj = glms_mat4_ucopy(R);
 }
