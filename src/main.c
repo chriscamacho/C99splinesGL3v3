@@ -249,16 +249,17 @@ int main()
         s->endSprite->pos.x   = start[ix++];
         s->endSprite->pos.y   = start[ix++];
     }
-    
-    for (int i = 0; i < 8; i++) {
+
+    for (int i = 0; i < 8; i++)
+    {
         CGLM_ALIGN(16) vec4s area;
         area = (vec4s) { { -hw + 128, winData.winSize.x - 256,
-                           -hh + 128 + hh *2, winData.winSize.y - 256 } };
+                           -hh + 128 + hh * 2, winData.winSize.y - 256 } };
         Sprite* s = newSprite(spriteSet, area, 0);
-        s->tint = (vec4s){{rnd(0.5,0.5), rnd(0.5,0.5), rnd(0.5,0.5), 1}};
+        s->tint  = (vec4s){ { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
         s->otint = s->tint;
-        s->tex = rnd(2,4);
-        s->size = (vec2s){{64,64}};
+        s->tex   = rnd(2, 4);
+        s->size  = (vec2s){ { 64, 64 } };
     }
 
     // -------------------------------------------------------------------
@@ -415,10 +416,10 @@ int main()
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (winData.winSize.y / 2) - 24 } }, .8, 0, false, fontSet);
         sprintf(fpsStr, "Zoom: %.2f Frames: %i", winData.zoom.x, frames);
         renderText(fpsStr, (vec2s){ { -(winData.winSize.x / 2) + 2, (-winData.winSize.y / 2) } }, .8, 0, false, fontSet);
-        
+
         sprintf(fpsStr, "Pan up to see sprites");
         useSpriteSet(fontSet, &PST);
-        renderText(fpsStr, (vec2s){ { 0, (winData.winSize.y / 2)-128 } }, .8, 0, true, fontSet);
+        renderText(fpsStr, (vec2s){ { 0, (winData.winSize.y / 2) - 128 } }, .8, 0, true, fontSet);
 
         SplineRenderAll(&PST);
         glCheckError(__FILE__, __LINE__);

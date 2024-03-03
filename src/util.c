@@ -157,14 +157,18 @@ char* readFile(const char* fname)
 // create a shader program from a single glsl file
 // if defs should define at least vert and frag shader
 // and optionally a geom shader
-GLuint createProgramGlsl(char* glslFile, bool hasGeom)
+GLuint createProgramGlsl(char* glslFile, bool hasGeom, const char* version)
 {
     // todo version as a param...
-    const char* vDef = "#version 330\n#define VERTEX_SHADER\n\n";
-    const char* gDef = "#version 330\n#define GEOMETRY_SHADER\n\n";
-    const char* fDef = "#version 330\n#define FRAGMENT_SHADER\n\n";
+    char vDef[80] = { 0 };
+    char gDef[80] = { 0 };
+    char fDef[80] = { 0 };
 
-    char*       glsl = NULL;
+    sprintf(vDef, "#version %s\n#define VERTEX_SHADER\n\n", version);
+    sprintf(gDef, "#version %s\n#define GEOMETRY_SHADER\n\n", version);
+    sprintf(fDef, "#version %s\n#define FRAGMENT_SHADER\n\n", version);
+
+    char* glsl = NULL;
 
     glsl = readFile(glslFile);
     if (!glsl) {

@@ -66,7 +66,7 @@ Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType)
 
 void initSprites()
 {
-    SpriteProgram = createProgramGlsl("data/sprite.glsl", true);
+    SpriteProgram = createProgramGlsl("data/sprite.glsl", true, "330");
     glUseProgram(SpriteProgram);
 
     SpriteProjL  = glGetUniformLocation(SpriteProgram, "projection");

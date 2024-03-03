@@ -16,7 +16,7 @@ GLuint initElementArrayBuffer(GLuint Bo, float* data, GLuint location,
 
 float rnd(float start, float range);
 char* readFile(const char* fname);
-GLuint createProgramGlsl(char* glslFile, bool hasGeom);
+GLuint createProgramGlsl(char* glslFile, bool hasGeom, const char* version);
 GLuint loadTextureAtlas(const char* fname, GLuint x, GLuint y, GLuint l);
 
 

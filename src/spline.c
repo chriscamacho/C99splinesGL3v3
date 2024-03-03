@@ -33,7 +33,7 @@ CGLM_ALIGN(16) mat4s SplineProj;
 void initSpline()
 {
     SplineList    = clistCreateList();
-    SplineProgram = createProgramGlsl("data/rich_lines.glsl", true);
+    SplineProgram = createProgramGlsl("data/rich_lines.glsl", true, "330");
     glUseProgram(SplineProgram);
 
     SplineTintL  = glGetUniformLocation(SplineProgram, "color");
