@@ -94,12 +94,6 @@ void initSprites()
     glVertexAttribPointer(SpriteSizeL, 2, GL_FLOAT, GL_FALSE, sizeof(SpriteData), (void*)8);
     glVertexAttribPointer(SpriteRotL, 1, GL_FLOAT, GL_FALSE, sizeof(SpriteData), (void*)16);
 
-    // can currently only have one atlas, have a way to load multiple
-    // and select which one to use.
-    //SpriteTexture = loadTextureAtlas("data/atlas.png", 256, 256, 6);
-    //SpriteTexture = loadTextureAtlas("data/font.png", 64, 64, 97);
-    //glUniform1i(SpriteAtlasL, 0);
-    //glBindTexture(GL_TEXTURE_2D_ARRAY, SpriteTexture);
     glCheckError(__FILE__, __LINE__);
 }
 
@@ -161,14 +155,6 @@ void useSpriteSet(SpriteSet* ss, mat4s* p)
     glUniform1i(SpriteAtlasL, ss->textureUnit);
 }
 
-/*
- * void setSpritePerspective(mat4s* p)
- * {
- *  glUseProgram(SpriteProgram);
- *  SpriteProj = *p;
- *  glActiveTexture(GL_TEXTURE0);
- * }
- */
 static void derefAndDraw(cnode_t* node)
 {
     Sprite* s = (Sprite*)(node->data);
@@ -179,15 +165,11 @@ static void derefAndDraw(cnode_t* node)
 // todo should there be a current SpriteSet so this doesn't need a param ?
 void SpriteRenderAll()
 {
-    //setSpritePerspective(proj);
     clistIterateForward(currentSpriteSet->SpriteList, derefAndDraw);
 }
 
 void renderSprite(Sprite* s)
 {
-    //glUseProgram(SpriteProgram);
-
-    //glUniformMatrix4fv(SpriteProjL, 1, GL_FALSE, (float*)&SpriteProj.raw);
     glUniform1i(SpriteTexL, s->tex);
     glUniform1f(SpriteDepthL, s->depth);
     glUniform4f(SpriteTintL, s->tint.r, s->tint.g, s->tint.b, s->tint.a);
@@ -202,15 +184,8 @@ void renderSprite(Sprite* s)
     glBindVertexArray(SpriteVAO);
     glBindBuffer(GL_ARRAY_BUFFER, SpriteVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(SpriteData), &SpriteData[0], GL_DYNAMIC_DRAW);
-    //glEnableVertexAttribArray(SpritePosL);
-    //glEnableVertexAttribArray(SpriteSizeL);
-    //glEnableVertexAttribArray(SpriteRotL);
 
     glDrawArrays(GL_POINTS, 0, 1);
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glDisableVertexAttribArray(SpritePosL);
-    //glDisableVertexAttribArray(SpriteSizeL);
-    //glDisableVertexAttribArray(SpriteRotL);
 }
 
 bool SpriteInBounds(Sprite* s, float x, float y)
