@@ -26,7 +26,7 @@ static GLuint     SpriteDepthL = 0;
 static float      SpriteData[5 * sizeof(float)];
 static SpriteSet* currentSpriteSet;
 
-Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType)
+Sprite* newSprite(SpriteSet* ss, vec4s area)
 {
     Sprite* s = calloc(1, sizeof(Sprite));
 
@@ -38,23 +38,7 @@ Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType)
     s->depth = .6;
     s->tex   = 1;
 
-    // TODO remove this too spline specific ! (param for tint)
-    switch (cpType) {
-    case 0:
-        s->tint = (vec4s) { { 1, 0, 0, 1 } };
-        break;
-    case 1:
-        s->tint = (vec4s) { { 1, 0, 1, 1 } };
-        break;
-    case 2:
-    default:
-        s->tint = (vec4s) { { 0, 1, 1, 1 } };
-        break;
-    case 3:
-        s->tint = (vec4s) { { 0, 1, 0, 1 } };
-        break;
-    }
-
+    s->tint = (vec4s) { { 1, 1, 1, 1 } };
     s->otint = s->tint;
 
     s->dragOff   = (vec2s)GLMS_VEC2_ZERO_INIT;

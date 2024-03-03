@@ -233,6 +233,12 @@ int main()
         101.9727,  -48.8820,  208.1340, -204.8342,  361.7113, -204.4507,  441.0488, -44.0520,
     };
     int   ix = 0;
+    
+    vec4s sc[4];
+    sc[0] = (vec4s) { { 1, 0, 0, 1 } };
+    sc[1] = (vec4s) { { 1, 0, 1, 1 } };
+    sc[2] = (vec4s) { { 0, 1, 1, 1 } };
+    sc[3] = (vec4s) { { 0, 1, 0, 1 } };
 
     for (int i = 0; i < numSplines; i++)
     {
@@ -242,12 +248,20 @@ int main()
         Spline* s = newSpline(spriteSet, area);
         s->startSprite->pos.x = start[ix++];
         s->startSprite->pos.y = start[ix++];
+        s->startSprite->tint = sc[0];
+        s->startSprite->otint = sc[0];
         s->cp1Sprite->pos.x   = start[ix++];
         s->cp1Sprite->pos.y   = start[ix++];
+        s->cp1Sprite->tint = sc[1];
+        s->cp1Sprite->otint = sc[1];
         s->cp2Sprite->pos.x   = start[ix++];
         s->cp2Sprite->pos.y   = start[ix++];
+        s->cp2Sprite->tint = sc[2];
+        s->cp2Sprite->otint = sc[2];
         s->endSprite->pos.x   = start[ix++];
         s->endSprite->pos.y   = start[ix++];
+        s->endSprite->tint = sc[3];
+        s->endSprite->otint = sc[3];
     }
 
     for (int i = 0; i < 8; i++)

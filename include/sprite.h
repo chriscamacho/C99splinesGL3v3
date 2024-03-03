@@ -31,7 +31,7 @@ void initSprites();
 void renderSprite(Sprite* s);
 void setSpritePerspective(mat4s* p);
 bool SpriteInBounds(Sprite* s, float x, float y);
-Sprite* newSprite(SpriteSet* ss, vec4s area, int cpType);
+Sprite* newSprite(SpriteSet* ss, vec4s area);
 void SpriteRelease();
 void SpriteRenderAll();
 
