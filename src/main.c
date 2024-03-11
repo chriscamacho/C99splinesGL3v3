@@ -214,7 +214,7 @@ int main()
     float      hh = winData.winSize.y / 2.0;
     winData.pan = (vec3s) { { 0, 0, 0.0 } };
 
-    mouseSprite            = newSprite(spriteSet, (vec4s){ { -1, 2, -1, 2 } }, 0);
+    mouseSprite            = newSprite(spriteSet, (vec4s){ { -1, 2, -1, 2 } });
     mouseSprite->tint      = (vec4s) { { 0.75, 0.2, 1, 1 } };
     mouseSprite->tex       = 0;
     mouseSprite->rot       = 0;
@@ -269,7 +269,7 @@ int main()
         CGLM_ALIGN(16) vec4s area;
         area = (vec4s) { { -hw + 128, winData.winSize.x - 256,
                            -hh + 128 + hh * 2, winData.winSize.y - 256 } };
-        Sprite* s = newSprite(spriteSet, area, 0);
+        Sprite* s = newSprite(spriteSet, area);
         s->tint  = (vec4s){ { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
         s->otint = s->tint;
         s->tex   = rnd(2, 4);

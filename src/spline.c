@@ -72,10 +72,10 @@ Spline* newSpline(SpriteSet* ss, vec4s area)
     spline->width       = 8;
     spline->depth       = .4;
     spline->tint        = (vec4s) { { rnd(0.5, 0.5), rnd(0.5, 0.5), rnd(0.5, 0.5), 1 } };
-    spline->startSprite = newSprite(ss, area, 0);
-    spline->cp1Sprite   = newSprite(ss, area, 1);
-    spline->cp2Sprite   = newSprite(ss, area, 2);
-    spline->endSprite   = newSprite(ss, area, 3);
+    spline->startSprite = newSprite(ss, area);
+    spline->cp1Sprite   = newSprite(ss, area);
+    spline->cp2Sprite   = newSprite(ss, area);
+    spline->endSprite   = newSprite(ss, area);
     clistAddNode(SplineList, spline);
     return(spline);
 }
