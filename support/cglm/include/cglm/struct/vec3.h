@@ -68,7 +68,6 @@
    CGLM_INLINE vec3s glms_vec3_lerpc(vec3s from, vec3s to, float t);
    CGLM_INLINE vec3s glms_vec3_mix(vec3s from, vec3s to, float t);
    CGLM_INLINE vec3s glms_vec3_mixc(vec3s from, vec3s to, float t);
-   CGLM_INLINE vec3s glms_vec3_step_uni(float edge, vec3s x);
    CGLM_INLINE vec3s glms_vec3_step(vec3s edge, vec3s x);
    CGLM_INLINE vec3s glms_vec3_smoothstep_uni(float edge0, float edge1, vec3s x);
    CGLM_INLINE vec3s glms_vec3_smoothstep(vec3s edge0, vec3s edge1, vec3s x);
@@ -76,11 +75,17 @@
    CGLM_INLINE vec3s glms_vec3_smoothinterpc(vec3s from, vec3s to, float t);
    CGLM_INLINE vec3s glms_vec3_swizzle(vec3s v, int mask);
    CGLM_INLINE vec3s glms_vec3_make(float * restrict src);
+   CGLM_INLINE vec3s glms_vec3_faceforward(vec3s n, vec3s v, vec3s nref);
+   CGLM_INLINE vec3s glms_vec3_reflect(vec3s v, vec3s n);
+   CGLM_INLINE bool  glms_vec3_refract(vec3s v, vec3s n, float eta, vec3s *dest)
 
  Convenient:
    CGLM_INLINE vec3s glms_cross(vec3s a, vec3s b);
    CGLM_INLINE float glms_dot(vec3s a, vec3s b);
    CGLM_INLINE vec3s glms_normalize(vec3s v);
+
+ Deprecated:
+   glms_vec3_step_uni  -->  use glms_vec3_steps
  */
 
 #ifndef cglms_vec3s_h
@@ -91,6 +96,9 @@
 #include "../util.h"
 #include "../vec3.h"
 #include "vec3-ext.h"
+
+/* DEPRECATED! */
+#define glms_vec3_step_uni(edge, x) glms_vec3_steps(edge, x)
 
 #define GLMS_VEC3_ONE_INIT   {GLM_VEC3_ONE_INIT}
 #define GLMS_VEC3_ZERO_INIT  {GLM_VEC3_ZERO_INIT}
@@ -194,7 +202,7 @@ glms_vec3_(dot)(vec3s a, vec3s b) {
  * @brief norm * norm (magnitude) of vec
  *
  * we can use this func instead of calling norm * norm, because it would call
- * sqrtf fuction twice but with this func we can avoid func call, maybe this is
+ * sqrtf function twice but with this func we can avoid func call, maybe this is
  * not good name for this func
  *
  * @param[in] v vector
@@ -656,7 +664,7 @@ glms_vec3_(crossn)(vec3s a, vec3s b) {
 }
 
 /*!
- * @brief angle betwen two vector
+ * @brief angle between two vector
  *
  * @param[in] a  vector1
  * @param[in] b  vector2
@@ -908,21 +916,6 @@ glms_vec3_(mixc)(vec3s from, vec3s to, float t) {
 }
 
 /*!
- * @brief threshold function (unidimensional)
- *
- * @param[in]   edge    threshold
- * @param[in]   x       value to test against threshold
- * @returns             0.0 if x < edge, else 1.0
- */
-CGLM_INLINE
-vec3s
-glms_vec3_(step_uni)(float edge, vec3s x) {
-  vec3s r;
-  glm_vec3_step_uni(edge, x.raw, r.raw);
-  return r;
-}
-
-/*!
  * @brief threshold function
  *
  * @param[in]   edge    threshold
@@ -1055,7 +1048,7 @@ glms_normalize(vec3s v) {
 /*!
  * @brief swizzle vector components
  *
- * you can use existin masks e.g. GLM_XXX, GLM_ZYX
+ * you can use existing masks e.g. GLM_XXX, GLM_ZYX
  *
  * @param[in]  v    source
  * @param[in]  mask mask
@@ -1077,10 +1070,63 @@ glms_vec3_(swizzle)(vec3s v, int mask) {
  */
 CGLM_INLINE
 vec3s
-glms_vec3_(make)(float * __restrict src) {
+glms_vec3_(make)(const float * __restrict src) {
   vec3s dest;
   glm_vec3_make(src, dest.raw);
   return dest;
+}
+
+/*!
+ * @brief a vector pointing in the same direction as another
+ *
+ * orients a vector to point away from a surface as defined by its normal
+ *
+ * @param[in] n      vector to orient.
+ * @param[in] v      incident vector
+ * @param[in] nref   reference vector
+ * @returns oriented vector, pointing away from the surface.
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(faceforward)(vec3s n, vec3s v, vec3s nref) {
+  vec3s dest;
+  glm_vec3_faceforward(n.raw, v.raw, nref.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief reflection vector using an incident ray and a surface normal
+ *
+ * @param[in]  I    incident vector
+ * @param[in]  N    normalized normal vector
+ * @returns reflection result
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(reflect)(vec3s v, vec3s n) {
+  vec3s dest;
+  glm_vec3_reflect(v.raw, n.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief computes refraction vector for an incident vector and a surface normal.
+ *
+ * calculates the refraction vector based on Snell's law. If total internal reflection
+ * occurs (angle too great given eta), dest is set to zero and returns false.
+ * Otherwise, computes refraction vector, stores it in dest, and returns true.
+ *
+ * @param[in]  v    normalized incident vector
+ * @param[in]  n    normalized normal vector
+ * @param[in]  eta  ratio of indices of refraction (incident/transmitted)
+ * @param[out] dest refraction vector if refraction occurs; zero vector otherwise
+ *
+ * @returns true if refraction occurs; false if total internal reflection occurs.
+ */
+CGLM_INLINE
+bool
+glms_vec3_(refract)(vec3s v, vec3s n, float eta, vec3s * __restrict dest) {
+  return glm_vec3_refract(v.raw, n.raw, eta, dest->raw);
 }
 
 #endif /* cglms_vec3s_h */

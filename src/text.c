@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define CGLM_USE_ANONYMOUS_STRUCT 1
 #include <cglm/struct/vec2.h>
 #include <cglm/struct/vec4.h>
 #include <cglm/struct/mat4.h>

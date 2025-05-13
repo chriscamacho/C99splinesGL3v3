@@ -53,7 +53,10 @@
    CGLM_INLINE vec2s glms_vec2_minv(vec2s a, vec2s b)
    CGLM_INLINE vec2s glms_vec2_clamp(vec2s v, float minVal, float maxVal)
    CGLM_INLINE vec2s glms_vec2_lerp(vec2s from, vec2s to, float t)
+   CGLM_INLINE vec2s glms_vec2_step(vec2s edge, vec2s x)
    CGLM_INLINE vec2s glms_vec2_make(float * restrict src)
+   CGLM_INLINE vec2s glms_vec2_reflect(vec2s v, vec2s n)
+   CGLM_INLINE bool  glms_vec2_refract(vec2s v, vec2s n, float eta, vec2s *dest)
  */
 
 #ifndef cglms_vec2s_h
@@ -179,7 +182,7 @@ glms_vec2_(cross)(vec2s a, vec2s b) {
  * @brief norm * norm (magnitude) of vec
  *
  * we can use this func instead of calling norm * norm, because it would call
- * sqrtf fuction twice but with this func we can avoid func call, maybe this is
+ * sqrtf function twice but with this func we can avoid func call, maybe this is
  * not good name for this func
  *
  * @param[in] v vector
@@ -678,6 +681,21 @@ glms_vec2_(lerp)(vec2s from, vec2s to, float t) {
 }
 
 /*!
+ * @brief threshold function
+ *
+ * @param[in]   edge    threshold
+ * @param[in]   x       value to test against threshold
+ * @returns             destination
+ */
+CGLM_INLINE
+vec2s
+glms_vec2_(step)(vec2s edge, vec2s x) {
+  vec2s r;
+  glm_vec2_step(edge.raw, x.raw, r.raw);
+  return r;
+}
+
+/*!
  * @brief Create two dimensional vector from pointer
  *
  * @param[in]  src  pointer to an array of floats
@@ -685,10 +703,45 @@ glms_vec2_(lerp)(vec2s from, vec2s to, float t) {
  */
 CGLM_INLINE
 vec2s
-glms_vec2_(make)(float * __restrict src) {
+glms_vec2_(make)(const float * __restrict src) {
   vec2s dest;
   glm_vec2_make(src, dest.raw);
   return dest;
+}
+
+/*!
+ * @brief reflection vector using an incident ray and a surface normal
+ *
+ * @param[in]  I    incident vector
+ * @param[in]  N    normalized normal vector
+ * @returns reflection result
+ */
+CGLM_INLINE
+vec2s
+glms_vec2_(reflect)(vec2s v, vec2s n) {
+  vec2s dest;
+  glm_vec2_reflect(v.raw, n.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief computes refraction vector for an incident vector and a surface normal.
+ *
+ * calculates the refraction vector based on Snell's law. If total internal reflection
+ * occurs (angle too great given eta), dest is set to zero and returns false.
+ * Otherwise, computes refraction vector, stores it in dest, and returns true.
+ *
+ * @param[in]  v    normalized incident vector
+ * @param[in]  n    normalized normal vector
+ * @param[in]  eta  ratio of indices of refraction (incident/transmitted)
+ * @param[out] dest refraction vector if refraction occurs; zero vector otherwise
+ *
+ * @returns true if refraction occurs; false if total internal reflection occurs.
+ */
+CGLM_INLINE
+bool
+glms_vec2_(refract)(vec2s v, vec2s n, float eta, vec2s * __restrict dest) {
+  return glm_vec2_refract(v.raw, n.raw, eta, dest->raw);
 }
 
 #endif /* cglms_vec2s_h */

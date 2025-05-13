@@ -1,3 +1,4 @@
+#define CGLM_USE_ANONYMOUS_STRUCT 1
 #include <cglm/struct/vec2.h>
 
 #include "gl_core_3_3.h"

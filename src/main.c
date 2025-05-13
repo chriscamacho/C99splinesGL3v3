@@ -10,6 +10,7 @@
 // CGLM_ALIGN(8) for vec3s
 // CGLM_ALIGN(16) for vec4s and mat4s
 
+#define CGLM_USE_ANONYMOUS_STRUCT 1
 #include <cglm/struct/vec2.h>
 #include <cglm/struct/vec3.h>
 #include <cglm/struct/vec4.h>
